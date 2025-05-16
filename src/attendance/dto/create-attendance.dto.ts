@@ -1,10 +1,16 @@
-import { IsBoolean, IsDateString, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsDateString, IsOptional, IsUUID, IsBoolean, IsString, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAttendanceDto {
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsUUID()
-  studentId: string;
+  studentId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  teacherId?: string;
 
   @ApiProperty()
   @IsDateString()
@@ -14,11 +20,12 @@ export class CreateAttendanceDto {
   @IsBoolean()
   present: boolean;
 
-  @ApiProperty({ enum: ['valid', 'invalid', 'none'] })
-  @IsEnum(['valid', 'invalid', 'none'])
-  reason: 'valid' | 'invalid' | 'none';
+  @ApiProperty({ enum: ['none', 'valid', 'invalid'] })
+  @IsIn(['none', 'valid', 'invalid'])
+  reason: 'none' | 'valid' | 'invalid';
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsString()
   reasonDescription?: string;
 }

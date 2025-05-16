@@ -15,7 +15,7 @@ export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @Post()
-  @Roles('admin', 'teacher', 'super_admin')
+  @Roles('admin', 'super_admin')
   create(@Body() dto: CreateAttendanceDto) {
     return this.attendanceService.create(dto);
   }

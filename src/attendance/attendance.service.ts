@@ -5,6 +5,7 @@ import { Attendance } from './entities/attendance.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { Student } from '../student/entities/student.entity';
+import { User } from "../user/entities/user.entity";
 
 @Injectable()
 export class AttendanceService {
@@ -13,16 +14,25 @@ export class AttendanceService {
     private attendanceRepo: Repository<Attendance>,
     @InjectRepository(Student)
     private studentRepo: Repository<Student>,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
   ) {}
 
   async create(dto: CreateAttendanceDto) {
-    const student = await this.studentRepo.findOne({ where: { id: dto.studentId } });
-    if (!student) throw new NotFoundException('Student not found');
+    const attendance = this.attendanceRepo.create({ ...dto });
 
-    const attendance = this.attendanceRepo.create({
-      ...dto,
-      student,
-    });
+    if (dto.studentId) {
+      const student = await this.studentRepo.findOne({ where: { id: dto.studentId } });
+      if (!student) throw new NotFoundException('Student not found');
+      attendance.student = student;
+    }
+
+    if (dto.teacherId) {
+      const teacher = await this.userRepo.findOne({ where: { id: dto.teacherId } });
+      if (!teacher) throw new NotFoundException('Teacher (user) not found');
+      attendance.teacher = teacher;
+    }
+
     return this.attendanceRepo.save(attendance);
   }
 

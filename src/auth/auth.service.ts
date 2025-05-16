@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -27,10 +27,16 @@ export class AuthService {
 
   async validateUser(username: string, password: string): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { username } });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return user;
+    if (!user) {
+      throw new BadRequestException('User not found');
     }
-    throw new UnauthorizedException('Invalid credentials');
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      throw new BadRequestException('Password incorrect');
+    }
+
+    return user;
   }
 
   async login(user: User) {
